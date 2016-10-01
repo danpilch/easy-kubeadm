@@ -1,0 +1,49 @@
+---
+
+- name: Install Kubernetes Repository
+  copy:
+    src: kubernetes.repo
+    dest: /etc/yum.repos.d/kubernetes.repo
+    mode: 0644
+  tags: add_kubernetes_repo
+
+- name: Install Kubernetes packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+    disable_gpg_check: yes
+  with_items:
+    - kubelet 
+    - kubeadm 
+    - kubectl 
+    - kubernetes-cni
+  tags: install_kubernetes_packages
+
+- name: Start kubelet
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+  tags: start_kubelet
+
+- name: Start master node
+  shell: "kubeadm init"
+  register: kubeadm_init
+  when: inventory_hostname in groups['kubernetes-master']
+  tags: init_kubernetes_master
+
+- name: Get the token id from the master initialisation
+  shell: "echo '{{ kubeadm_init.stdout }}' | tail -n1 | awk '{print $4}'" 
+  register: kubeadm_token
+  when: inventory_hostname in groups['kubernetes-master']     
+  tags: init_kubernetes_nodes
+
+- name: Register nodes with master
+  shell: "kubeadm join --token {{ hostvars[groups['kubernetes-master'][0]].kubeadm_token.stdout }} {{ hostvars[groups['kubernetes-master'][0]].ansible_default_ipv4.address }}"
+  when: inventory_hostname in groups['kubernetes-nodes']     
+  tags: register_nodes
+
+- name: Install overlay network      
+  shell: "kubectl apply -f https://git.io/weave-kube" 
+  when: inventory_hostname in groups['kubernetes-master']     
+  tags: install_weave_overlay_network
