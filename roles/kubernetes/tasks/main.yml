@@ -9,14 +9,13 @@
 
 - name: Install Kubernetes packages
   yum:
-    name: "{{ item }}"
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+      - kubernetes-cni
     state: latest
     disable_gpg_check: yes
-  with_items:
-    - kubelet
-    - kubeadm
-    - kubectl
-    - kubernetes-cni
   tags: install_kubernetes_packages
 
 - name: Start kubelet
