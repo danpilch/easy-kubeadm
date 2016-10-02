@@ -8,20 +8,20 @@
   tags: add_docker_repo
 
 - name: Remove legacy docker package
-  yum: 
+  yum:
     pkg: docker
     state: absent
   tags: remove_legacy_docker
 
 - name: Install Docker
-  yum: 
+  yum:
     pkg: "{{ docker_version }}"
     state: installed
   tags: install_docker
 
 - name: start docker
-  service: 
-    name: docker 
-    state: started 
+  service:
+    name: docker
+    state: started
     enabled: yes
   tags: start_docker
