@@ -1,0 +1,49 @@
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+  config.ssh.username = 'vagrant'
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+  end
+
+  machines = ["master", "node"]
+  count = machines.size
+  machines.each do |machine_id|
+    config.vm.define "easy-kube-#{machine_id}" do |machine|
+
+      machine.vm.hostname = "easy-kube-#{machine_id}"
+      machine.vm.box = "centos/7"
+      machine.vm.network "public_network",
+         use_dhcp_assigned_default_route: true
+
+      # We want to get rid of the first default route so that ansible
+      # Recognizes the second eth1 interface as ansible_default_ipv4
+      # Which in this case it attached to our actual LAN network
+      machine.vm.provision "shell",
+        run: "always",
+        inline: "ip r | awk '$1 == \"default\" && $5 == \"eth0\" { print $1,$2,$3 }' |  xargs --no-run-if-empty sudo ip r del"
+
+      # Only execute once the Ansible provisioner,
+      # when all the machines are up and ready.
+      count -= 1
+      if count == 0
+        machine.vm.provision :ansible do |ansible|
+          # Disable default limit to connect to all the machines
+          ansible.limit = "all"
+          ansible.sudo = true
+          ansible.playbook = "../create-cluster-playbook.yml"
+          ansible.raw_arguments = "-vv"
+
+          ansible.groups = {
+            "kubernetes-master" => ["easy-kube-master"],
+            "kubernetes-nodes" => ["easy-kube-node"],
+            "kubernetes-servers:children" => ["kubernetes-master", "kubernetes-nodes"]
+          }
+        end
+      end
+
+    end
+  end
+end
