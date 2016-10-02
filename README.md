@@ -12,9 +12,9 @@ CentOS (v7) hosts (be it, AWS, GCP or  DigitalOcean etc.)
 
 ### Installation
 
-Setup 3 vanilla CentOS machines with your chosen provider (I'm using DigitalOcean). 
+Setup 3 vanilla CentOS machines with your chosen provider (I'm using DigitalOcean).
 
-1x master 
+1x master
 2x nodes
 
 In your [inventory](./inventories/main.ini) place the IP addresses you intend to use.
@@ -29,7 +29,7 @@ To check if everything has provisioned correctly, on your master node, invoke:
 
 `kubectl get nodes`
 
-This will output all the nodes connected in the cluster: 
+This will output all the nodes connected in the cluster:
 
 ```
 NAME                 STATUS    AGE
