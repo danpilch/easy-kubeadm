@@ -8,9 +8,10 @@ This project intends to show how easy it is to setup a v1.4 K8s cluster with min
 ### Requrements
 
 Ansible (tested on 2.1.2.0)
+
 CentOS (v7) hosts (be it, AWS, GCP or  DigitalOcean etc.)
-or
-Vagrant (thanks @xenithorb)
+
+Vagrant (thanks @[xenithorb](https://github.com/xenithorb))
 
 ### Installation
 
