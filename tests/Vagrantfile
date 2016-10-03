@@ -7,10 +7,8 @@ Vagrant.configure("2") do |config|
   machines = ["master", "node"]
   count = machines.size
 
-
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
-
   end
 
   config.vm.provider :libvirt do |domain|
@@ -41,7 +39,7 @@ Vagrant.configure("2") do |config|
           run: "always",
           inline: "ip r | awk '$1 == \"default\" && $5 == \"eth0\" { print $1,$2,$3 }' |  xargs --no-run-if-empty sudo ip r del"
       end
-      
+
       # Only execute once the Ansible provisioner,
       # when all the machines are up and ready.
       count -= 1
