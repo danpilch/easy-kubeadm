@@ -4,26 +4,41 @@ Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
   config.ssh.username = 'vagrant'
 
+  machines = ["master", "node"]
+  count = machines.size
+
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
   end
 
-  machines = ["master", "node"]
-  count = machines.size
+  config.vm.provider :libvirt do |domain|
+    domain.memory = 1024
+  end
+
   machines.each do |machine_id|
     config.vm.define "easy-kube-#{machine_id}" do |machine|
 
+      config.vm.provider :virtualbox do
+        machine.vm.network "public_network",
+        use_dhcp_assigned_default_route: true
+      end
+
+      config.vm.provider :libvirt do
+        machine.vm.network "private_network", type: "dhcp",
+        use_dhcp_assigned_default_route: true
+      end
+
       machine.vm.hostname = "easy-kube-#{machine_id}"
       machine.vm.box = "centos/7"
-      machine.vm.network "public_network",
-         use_dhcp_assigned_default_route: true
 
       # We want to get rid of the first default route so that ansible
       # Recognizes the second eth1 interface as ansible_default_ipv4
       # Which in this case it attached to our actual LAN network
-      machine.vm.provision "shell",
-        run: "always",
-        inline: "ip r | awk '$1 == \"default\" && $5 == \"eth0\" { print $1,$2,$3 }' |  xargs --no-run-if-empty sudo ip r del"
+      config.vm.provider :virtualbox do
+        machine.vm.provision "shell",
+          run: "always",
+          inline: "ip r | awk '$1 == \"default\" && $5 == \"eth0\" { print $1,$2,$3 }' |  xargs --no-run-if-empty sudo ip r del"
+      end
 
       # Only execute once the Ansible provisioner,
       # when all the machines are up and ready.
@@ -43,7 +58,6 @@ Vagrant.configure("2") do |config|
           }
         end
       end
-
     end
-  end
+ end
 end
