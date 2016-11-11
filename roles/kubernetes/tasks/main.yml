@@ -32,13 +32,18 @@
   tags: init_kubernetes_master
 
 - name: Get the token id from the master initialisation
-  shell: "echo '{{ kubeadm_init.stdout }}' | tail -n1 | awk '{print $4}'"
+  shell: "echo '{{ kubeadm_init.stdout }}' | tail -n1 | awk '{print $3}'"
   register: kubeadm_token
   when: inventory_hostname in groups['kubernetes-master']
   tags: init_kubernetes_nodes
 
+- name: Ensure node /etc/kubernetes is empty
+  shell: "rm -rf /etc/kubernetes/*"
+  when: inventory_hostname in groups['kubernetes-nodes']
+  tags: purge_kubernetes_config_dir_nodes
+
 - name: Register nodes with master
-  shell: "kubeadm join --token {{ hostvars[groups['kubernetes-master'][0]].kubeadm_token.stdout }} {{ hostvars[groups['kubernetes-master'][0]].ansible_default_ipv4.address }}"
+  shell: "kubeadm join {{ hostvars[groups['kubernetes-master'][0]].kubeadm_token.stdout }} {{ hostvars[groups['kubernetes-master'][0]].ansible_default_ipv4.address }}"
   when: inventory_hostname in groups['kubernetes-nodes']
   tags: register_nodes
 
