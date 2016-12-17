@@ -1,5 +1,5 @@
 # easy-kube
-Setup a Kubernetes v1.4 cluster easily on CentOS 7
+Setup a Kubernetes v1.5 cluster easily on CentOS 7
 
 ## Overview
 
