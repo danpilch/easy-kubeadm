@@ -3,7 +3,7 @@ Setup a Kubernetes v1.5 cluster easily on CentOS 7
 
 ## Overview
 
-This project intends to show how easy it is to setup a v1.4 K8s cluster with minimal experience using Kubnernetes. I have adapted this project from the great guide: [Installing Kubernetes on Linux with kubeadm](http://kubernetes.io/docs/getting-started-guides/kubeadm/)
+This project intends to show how easy it is to setup a K8s cluster with minimal experience using Kubnernetes. I have adapted this project from the great guide: [Installing Kubernetes on Linux with kubeadm](http://kubernetes.io/docs/getting-started-guides/kubeadm/)
 
 ### Requrements
 
