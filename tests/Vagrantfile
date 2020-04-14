@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
   config.ssh.username = 'vagrant'
 
 
-  machines = ["master", "node1", "node2"]
+  machines = ["master", "node1", "node2", "node3"]
   count = machines.size
 
   config.vm.provider "virtualbox" do |vb,override|
@@ -37,11 +37,10 @@ Vagrant.configure("2") do |config|
           ansible.limit = "all"
           ansible.sudo = true
           ansible.playbook = "../create-cluster-playbook.yml"
-          #ansible.raw_arguments = "-vv"
 
           ansible.groups = {
             "kubernetes_master" => ["easy-kube-master"],
-            "kubernetes_nodes" => ["easy-kube-node1", "easy-kube-node2"],
+            "kubernetes_nodes" => ["easy-kube-node1", "easy-kube-node2", "easy-kube-node3"],
             "kubernetes_servers:children" => ["kubernetes_master", "kubernetes_nodes"]
           }
         end
