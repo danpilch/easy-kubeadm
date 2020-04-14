@@ -1,5 +1,5 @@
 # easy-kubernetes
-Setup a Kubernetes v1.5 cluster easily on CentOS 7
+Setup a Kubernetes v1.18 cluster easily on CentOS 8
 
 ## Overview
 
@@ -7,9 +7,9 @@ This project intends to show how easy it is to setup a K8s cluster with minimal 
 
 ### Requrements
 
-Ansible (tested on 2.1.2.0)
+Ansible (tested on 2.9.6)
 
-CentOS (v7) hosts (be it, AWS, GCP or  DigitalOcean etc.)
+CentOS (v8) hosts (be it, AWS, GCP or  DigitalOcean etc.)
 
 Vagrant (thanks @[xenithorb](https://github.com/xenithorb))
 
