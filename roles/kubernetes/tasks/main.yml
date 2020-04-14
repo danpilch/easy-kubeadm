@@ -3,7 +3,7 @@
   lineinfile:
     dest: /etc/hosts
     regexp: '.*{{ item }}$'
-    line: "{{item}} {{ hostvars[item].ansible_nodename }}"
+    line: "{{ item }} {{ hostvars[item].ansible_nodename }}"
     state: present
   when: hostvars[item].ansible_nodename is defined
   with_items: "{{ groups['all'] }}"
@@ -46,8 +46,8 @@
 
 # Defining cgroup-driver
 - name: Define sysconfig kubelet
-  file:
-    content: "KUBELET_EXTRA_ARGS=--feature-gates=\"AllAlpha=false,RunAsGroup=true\" --container-runtime=remote --cgroup-driver=systemd --container-runtime-endpoint='unix:///var/run/crio/crio.sock' --runtime-request-timeout=5m"
+  template:
+    src: "sysconfig_kubelet.j2"
     dest: "/etc/sysconfig/kubelet"
     owner: root
     group: root
@@ -56,7 +56,7 @@
 - name: Start kubelet
   service:
     name: kubelet
-    state: started
+    state: stopped
     enabled: yes
   tags: start_kubelet
 
@@ -71,8 +71,6 @@
   register: kubeadm_join
   when: inventory_hostname in groups['kubernetes_master']
   tags: init_kubernetes_master
-
-- debug: var=kubeadm_join
 
 - name: Ensure node /etc/kubernetes is empty
   shell: "rm -rf /etc/kubernetes/*"

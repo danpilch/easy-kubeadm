@@ -4,6 +4,8 @@
   hosts: kubernetes_servers
 
   roles:
+    - role: base
+
     - role: cri-o
 
     - role: kubernetes
