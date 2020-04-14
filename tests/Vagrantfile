@@ -3,12 +3,16 @@
 Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
   config.ssh.username = 'vagrant'
+  
+  config.vm.network "public_network",
+    use_dhcp_assigned_default_route: true
 
-  machines = ["master", "node"]
+
+  machines = ["master", "node", "node"]
   count = machines.size
 
   config.vm.provider "virtualbox" do |vb,override|
-    vb.customize ["modifyvm", :id, "--memory", "1024"]
+    vb.customize ["modifyvm", :id, "--memory", "4096"]
     # We want to get rid of the first default route so that ansible
     # Recognizes the second eth1 interface as ansible_default_ipv4
     # Which in this case it attached to our actual LAN network
@@ -20,7 +24,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider "libvirt" do |domain,override|
-    domain.memory = 1024
+    domain.memory = 4096
     override.vm.network "private_network", type: "dhcp",
       use_dhcp_assigned_default_route: true
   end
@@ -28,7 +32,7 @@ Vagrant.configure("2") do |config|
   machines.each do |machine_id|
     config.vm.define "easy-kube-#{machine_id}" do |machine|
       machine.vm.hostname = "easy-kube-#{machine_id}"
-      machine.vm.box = "centos/7"
+      machine.vm.box = "centos/8"
       count -= 1
       if count == 0
         machine.vm.provision "ansible" do |ansible|

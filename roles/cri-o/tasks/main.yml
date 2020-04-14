@@ -1,0 +1,63 @@
+---
+- name: Load kernel modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - overlay
+    - br_netfilter
+  tags: load_kernel_modules
+
+- name: Persist kernel modules
+  copy:
+    src: "crio_modules.conf"
+    dest: "/etc/modules-load.d/crio.conf"
+    owner: root
+    group: root
+  tags: persist_kernel_modules
+
+- name: Install sysctl params
+  copy:
+    src: "99-kubernetes-cri.conf"
+    dest: "/etc/sysctl.d/99-kubernetes-cri.conf"
+    owner: root
+    group: root
+  register: sysctl_result
+  tags: copy_sysctl_params
+
+- name: update sysctl
+  shell: sysctl -p --system
+  when: sysctl_result.changed  
+
+- name: Install cri-o repo files
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/yum.repos.d/{{ item }}"
+    owner: root
+    group: root
+  with_items:
+    - container-selinux.repo
+    - devel-kubic-libcontainers-stable.repo
+    - devel-kubic-libcontainers-stable-cri-o-1.17.repo
+  tags: copy_cri_o_repos
+
+- name: Install cri-o
+  dnf:
+    name: cri-o
+    state: latest
+  tags: install_cri_o
+
+- name: Replace path in crio.conf
+  template:
+    src: "crio.conf.j2"
+    dest: "/etc/crio/crio.conf"
+    owner: root
+    group: root
+  tags: template_crio_conf
+
+- name: Restart cri-o service
+  service:
+    name: cri-o
+    state: restarted
+    enabled: yes
+  tags: restart_cri_o

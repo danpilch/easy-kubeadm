@@ -1,4 +1,31 @@
 ---
+- name: Add IP address of all hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{item}} {{ hostvars[item].ansible_nodename }}"
+    state: present
+  when: hostvars[item].ansible_nodename is defined
+  with_items: "{{ groups['all'] }}"
+  tags: add_hosts
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: install utils
+  yum:
+    name:
+      - iproute-tc
+      - bind-utils
+    state: installed
+  tags: install_utils
 
 - name: Install Kubernetes Repository
   copy:
@@ -13,10 +40,18 @@
       - kubelet
       - kubeadm
       - kubectl
-      - kubernetes-cni
+    disable_excludes: kubernetes
     state: latest
-    disable_gpg_check: yes
   tags: install_kubernetes_packages
+
+# Defining cgroup-driver
+- name: Define sysconfig kubelet
+  file:
+    content: "KUBELET_EXTRA_ARGS=--feature-gates=\"AllAlpha=false,RunAsGroup=true\" --container-runtime=remote --cgroup-driver=systemd --container-runtime-endpoint='unix:///var/run/crio/crio.sock' --runtime-request-timeout=5m"
+    dest: "/etc/sysconfig/kubelet"
+    owner: root
+    group: root
+  tags: define_sysconfig_kubelet
 
 - name: Start kubelet
   service:
@@ -28,26 +63,34 @@
 - name: Start master node
   shell: "kubeadm init"
   register: kubeadm_init
-  when: inventory_hostname in groups['kubernetes-master']
+  when: inventory_hostname in groups['kubernetes_master']
   tags: init_kubernetes_master
 
-- name: Get the token id from the master initialisation
-  shell: "echo '{{ kubeadm_init.stdout }}' | tail -n1 | awk '{print $3}'"
-  register: kubeadm_token
-  when: inventory_hostname in groups['kubernetes-master']
-  tags: init_kubernetes_nodes
+- name: Generate join command from master
+  shell: "kubeadm token create --print-join-command"
+  register: kubeadm_join
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: init_kubernetes_master
+
+- debug: var=kubeadm_join
 
 - name: Ensure node /etc/kubernetes is empty
   shell: "rm -rf /etc/kubernetes/*"
-  when: inventory_hostname in groups['kubernetes-nodes']
+  when: inventory_hostname in groups['kubernetes_nodes']
   tags: purge_kubernetes_config_dir_nodes
 
 - name: Register nodes with master
-  shell: "kubeadm join {{ hostvars[groups['kubernetes-master'][0]].kubeadm_token.stdout }} {{ hostvars[groups['kubernetes-master'][0]].ansible_default_ipv4.address }}"
-  when: inventory_hostname in groups['kubernetes-nodes']
+  shell: "{{ hostvars[groups['kubernetes_master'][0]].kubeadm_join.stdout_lines[-1] }}"
+  when: inventory_hostname in groups['kubernetes_nodes']
   tags: register_nodes
 
+- name: Get k8s version
+  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf version | base64 -w 0"
+  register: k8s_version
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: get_k8s_version
+
 - name: Install overlay network
-  shell: "kubectl apply -f https://git.io/weave-kube"
-  when: inventory_hostname in groups['kubernetes-master']
+  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f 'https://cloud.weave.works/k8s/net?k8s-version={{ hostvars[groups['kubernetes_master'][0]].k8s_version.stdout }}'"
+  when: inventory_hostname in groups['kubernetes_master']
   tags: install_weave_overlay_network
