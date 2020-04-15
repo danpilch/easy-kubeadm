@@ -16,3 +16,5 @@
       - htop
       - telnet
       - net-tools
+      - tcpdump
+      - jq
