@@ -9,15 +9,18 @@
   with_items: "{{ groups['all'] }}"
   tags: add_hosts
 
-- name: Remove swapfile from /etc/fstab
-  mount:
-    name: swapfile
-    fstype: swap
-    state: absent
-
 - name: Disable swap
   command: swapoff -a
   when: ansible_swaptotal_mb > 0
+  tags: swap
+
+- name: Disable swap permanently, persist reboots
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+    backup: yes
+  tags: swap
 
 - name: install utils
   yum:
