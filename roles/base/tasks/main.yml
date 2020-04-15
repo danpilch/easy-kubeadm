@@ -12,6 +12,7 @@
 - name: Install extras
   yum:
     name: 
+      - tmux
       - vim
       - htop
       - telnet

@@ -95,3 +95,31 @@
   shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f 'https://cloud.weave.works/k8s/net?k8s-version={{ hostvars[groups['kubernetes_master'][0]].k8s_version.stdout }}'"
   when: inventory_hostname in groups['kubernetes_master']
   tags: install_weave_overlay_network
+
+- name: Create kubeconfig directory in vagrant user directory
+  file:
+    path: "/home/vagrant/.kube/"
+    state: directory 
+    mode: 0755
+    owner: vagrant
+    group: vagrant
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: copy_kubeconfig
+
+- name: Copy kubectl admin config file to vagrant user directory
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "/home/vagrant/.kube/config"
+    remote_src: true
+    owner: vagrant
+    group: vagrant
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: copy_kubeconfig
+
+- name: Add kubectl autocompletion to bashrc for vagrant user
+  lineinfile:
+    dest: "/home/vagrant/.bashrc"
+    line: "source <(kubectl completion bash)"
+    state: present
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: add_kubectl_completion
