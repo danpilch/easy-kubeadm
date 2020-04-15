@@ -1,0 +1,20 @@
+---
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install epel
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Install extras
+  yum:
+    name: 
+      - vim
+      - htop
+      - telnet
+      - net-tools
+      - tcpdump
+      - jq

@@ -1,10 +1,11 @@
 ---
 
-- name: Startup a vanilla Kubernetes 1.5 cluster
-  hosts: kubernetes-servers
+- name: Setup a Kubernetes 1.18 cluster
+  hosts: kubernetes_servers
 
   roles:
-    - role: docker
-      docker_version: "docker-engine-1.12.6-1.el7.centos.x86_64"
+    - role: base
+
+    - role: cri-o
 
     - role: kubernetes

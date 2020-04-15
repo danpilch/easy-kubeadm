@@ -1,0 +1,7 @@
+[devel_kubic_libcontainers_stable_cri-o_1.17]
+name=1.17 (CentOS_8)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/1.17/CentOS_8/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/1.17/CentOS_8/repodata/repomd.xml.key
+enabled=1
