@@ -37,6 +37,8 @@ Vagrant.configure("2") do |config|
           ansible.limit = "all"
           ansible.become = true
           ansible.playbook = "../create-cluster-playbook.yml"
+          #ansible.tags=""
+          #ansible.verbose = true
 
           ansible.groups = {
             "kubernetes_master" => ["easy-kube-master"],
