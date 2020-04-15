@@ -30,4 +30,6 @@ Now you can provision your K8s cluster with:
 
 ### Vagrant usage
 
-cd tests && vagrant up
+You may need to change the brige interface in `tests/Vagrantfile` from `bridge: "wlp2s0"` to whatever is suitable for your environment.
+
+`cd tests && vagrant up`
