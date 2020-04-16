@@ -12,6 +12,7 @@
 - name: Install extras
   yum:
     name: 
+      - "@Development Tools"
       - tmux
       - vim
       - htop
