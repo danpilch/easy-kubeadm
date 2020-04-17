@@ -1,4 +1,9 @@
 --- 
+- name: install ipvsadm
+  yum:
+    name: ipvsadm
+    state: installed
+  tags: install_ipvsadm
 
 - name: Load kernel modules
   modprobe:
