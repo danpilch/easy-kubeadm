@@ -1,0 +1,11 @@
+---
+
+kubernetes_version: "v1.18.2"
+kubernetes_service_subnet: "10.96.0.0/12"
+
+kubernetes_ipvs_enabled: true
+# Strict ARP required for Metal LB: https://metallb.universe.tf/installation/
+kubernetes_ipvs_strict_arp: true
+# More about schedulers can be found: https://docs.huihoo.com/hpc-cluster/linux-virtual-server/HOWTO/LVS-HOWTO.ipvsadm.html
+kubernetes_ipvs_scheduler: "rr"
+

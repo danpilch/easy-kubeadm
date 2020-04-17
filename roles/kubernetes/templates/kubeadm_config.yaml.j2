@@ -1,0 +1,22 @@
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: JoinConfiguration
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+
+{% if kubernetes_ipvs_enabled %}
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+ipvs:
+  scheduler: {{ kubernetes_ipvs_scheduler }}
+  strictARP: {{ kubernetes_ipvs_strict_arp }}
+{% endif %}
