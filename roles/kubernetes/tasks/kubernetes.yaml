@@ -56,15 +56,21 @@
     group: root
   tags: define_sysconfig_kubelet
 
-- name: Start kubelet
+- name: Enable kubelet systemctl
   service:
     name: kubelet
     state: stopped
     enabled: yes
   tags: start_kubelet
 
+- name: Generate kubeadm config file
+  template:
+    src: "kubeadm_config.yaml.j2"
+    dest: "/tmp/kubeadm_config.yaml"
+  tags: generate_kubeadm_config
+
 - name: Start master node
-  shell: "kubeadm init"
+  shell: "kubeadm init --config /tmp/kubeadm_config.yaml"
   register: kubeadm_init
   when: inventory_hostname in groups['kubernetes_master']
   tags: init_kubernetes_master

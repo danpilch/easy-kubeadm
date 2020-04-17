@@ -1,0 +1,6 @@
+---
+
+- include: ipvs_config.yaml
+  when: kubernetes_ipvs_enabled
+
+- include: kubernetes.yaml
