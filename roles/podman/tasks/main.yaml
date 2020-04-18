@@ -1,4 +1,4 @@
 ---
 
 - include: podman.yaml
-  when: podman_enabled
+  when: podman_enabled and inventory_hostname in groups['kubernetes_master']

@@ -3,11 +3,13 @@
 - name: disable container-tools module 
   shell:
     cmd: "dnf -y module disable container-tools"
+    warn: false
   tags: disable_container_tools_module
 
 - name: enable copr selinux
   shell:
     cmd: "dnf -y copr enable rhcontainerbot/container-selinux"
+    warn: false
   tags: enable_copr_selinux
 
 - name: Add kubic repo
