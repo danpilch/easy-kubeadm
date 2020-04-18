@@ -1,11 +1,13 @@
 ---
 
-- name: Setup a Kubernetes 1.18 cluster
+- name: Setup a Kubernetes cluster
   hosts: kubernetes_servers
 
   roles:
-    - role: base
+  - role: base
 
-    - role: cri-o
+  - role: podman
 
-    - role: kubernetes
+  - role: cri-o
+
+  - role: kubernetes
