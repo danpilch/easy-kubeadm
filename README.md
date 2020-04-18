@@ -32,4 +32,11 @@ Now you can provision your K8s cluster with:
 
 You may need to change the brige interface in `tests/Vagrantfile` from `bridge: "wlp2s0"` to whatever is suitable for your environment.
 
-`cd tests && vagrant up`
+```
+cd tests
+vagrant up
+
+# copy kubeconfig to host
+vagrant plugin install vagrant-scp
+vagrant scp easy-kube-master:~/.kube/config ~/.kube
+```

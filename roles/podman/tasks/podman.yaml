@@ -15,13 +15,14 @@
 - name: Add kubic repo
   copy: 
     src: "podman_kubic.conf"
-    dest: "/etc/yum.repos.d/podman_kubic.conf"
+    dest: "/etc/yum.repos.d/podman_kubic.repo"
     owner: root
     group: root
   tags: add_kubic_repo
 
 - name: Install podman packages
   dnf:
+    state: latest
     name:
     - fuse-overlayfs
     - podman
