@@ -1,0 +1,27 @@
+---
+
+- name: disable container-tools module 
+  shell:
+    cmd: "dnf -y module disable container-tools"
+  tags: disable_container_tools_module
+
+- name: enable copr selinux
+  shell:
+    cmd: "dnf -y copr enable rhcontainerbot/container-selinux"
+  tags: enable_copr_selinux
+
+- name: Add kubic repo
+  copy: 
+    src: "podman_kubic.conf"
+    dest: "/etc/yum.repos.d/podman_kubic.conf"
+    owner: root
+    group: root
+  tags: add_kubic_repo
+
+- name: Install podman packages
+  dnf:
+    name:
+    - fuse-overlayfs
+    - podman
+    - podman-docker
+  tags: install_podman_packages

@@ -1,0 +1,4 @@
+---
+
+- include: podman.yaml
+  when: podman_enabled
