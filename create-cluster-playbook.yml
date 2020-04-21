@@ -11,3 +11,5 @@
   - role: cri-o
 
   - role: kubernetes
+
+  - role: metrics-server

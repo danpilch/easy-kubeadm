@@ -1,0 +1,10 @@
+---
+- name: Install metrics server configuration
+  shell:
+    cmd: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f 'https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml'"
+  tags: install_metrics_server_kubectl
+
+- name: Patch metrics server deployment to allow insecure connections
+  shell:
+    cmd: "kubectl --kubeconfig /etc/kubernetes/admin.conf -n kube-system patch deployments.apps metrics-server --type=json --patch '[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args\", \"value\": [\"--cert-dir=/tmp\", \"--secure-port=4443\", \"--kubelet-preferred-address-types=InternalIP\", \"--kubelet-insecure-tls\"]}]'"  
+  tags: patch_metrics_server_deployment
