@@ -1,14 +1,4 @@
 ---
-#- name: Add IP address of all hosts to all hosts
-#  lineinfile:
-#    dest: /etc/hosts
-#    regexp: '.*{{ item }}$'
-#    line: "{{ item }} {{ hostvars[item].ansible_nodename }}"
-#    state: present
-#  when: hostvars[item].ansible_nodename is defined
-#  with_items: "{{ groups['all'] }}"
-#  tags: add_hosts
-
 - name: upgrade all packages
   yum:
     name: '*'
