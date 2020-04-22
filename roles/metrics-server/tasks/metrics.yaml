@@ -6,5 +6,5 @@
 
 - name: Patch metrics server deployment to allow insecure connections
   shell:
-    cmd: "kubectl --kubeconfig /etc/kubernetes/admin.conf -n kube-system patch deployments.apps metrics-server --type=json --patch '[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args\", \"value\": [\"--cert-dir=/tmp\", \"--secure-port=4443\", \"--kubelet-preferred-address-types=InternalIP\", \"--kubelet-insecure-tls\"]}]'"  
+    cmd: "kubectl --kubeconfig /etc/kubernetes/admin.conf -n kube-system patch deployments.apps metrics-server --type=json --patch '[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args\", \"value\": [\"--cert-dir=/tmp\", \"--secure-port=4443\", \"--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname\", \"--kubelet-insecure-tls\"]}]'"  
   tags: patch_metrics_server_deployment
