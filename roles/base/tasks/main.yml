@@ -13,6 +13,8 @@
   yum:
     name: 
       - "@Development Tools"
+      - iproute-tc
+      - bind-utils
       - tmux
       - vim
       - htop
