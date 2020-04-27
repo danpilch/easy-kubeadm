@@ -4,3 +4,9 @@
   when: kubernetes_ipvs_enabled
 
 - include: kubernetes.yaml
+
+- include: master.yaml
+  when: inventory_hostname in groups['kubernetes_master']
+
+- include: node.yaml
+  when: inventory_hostname in groups['kubernetes_nodes']

@@ -1,0 +1,4 @@
+export KUBE_MULTI_MASTER=true
+export KUBE_MASTER_COUNT=3
+export KUBE_NODE_COUNT=2
+export KUBE_MEMORY=2048

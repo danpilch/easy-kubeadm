@@ -9,3 +9,7 @@ kubernetes_ipvs_strict_arp: true
 # More about schedulers can be found: https://docs.huihoo.com/hpc-cluster/linux-virtual-server/HOWTO/LVS-HOWTO.ipvsadm.html
 kubernetes_ipvs_scheduler: "rr"
 
+# Multi master control plane configuration
+control_plane_endpoint_dns: control.importos.xyz
+control_plane_endpoint_port: 6443
+control_plane_multi_master: false
