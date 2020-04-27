@@ -6,10 +6,6 @@ KUBE_NODE_COUNT = Integer(ENV['KUBE_NODE_COUNT'] || 3)
 KUBE_MEMORY = ENV['KUBE_MEMORY'] || "3072"
 KUBE_CPUS = Integer(ENV['KUBE_CPUS'] || 2)
 
-
-
-
-
 Vagrant.configure("2") do |config|
   config.ssh.insert_key = false
   config.ssh.username = 'vagrant'
