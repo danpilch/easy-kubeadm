@@ -10,6 +10,8 @@ kubernetes_ipvs_strict_arp: true
 kubernetes_ipvs_scheduler: "rr"
 
 # Multi master control plane configuration
-control_plane_endpoint_dns: control.importos.xyz
-control_plane_endpoint_port: 6443
+# control_plane_endpoint_address can be either dns or ip
+control_plane_endpoint_address: "{{ hostvars[groups['kubernetes_haproxy'][0]].ansible_eth1.ipv4.address|default(None) }}"
+control_plane_endpoint_port: 6443 
+# disabled by default. this is anabled in vagrantfile extra_args
 control_plane_multi_master: false

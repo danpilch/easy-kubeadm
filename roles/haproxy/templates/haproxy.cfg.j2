@@ -48,7 +48,7 @@ global
 # use if not designated in their block
 #---------------------------------------------------------------------
 defaults
-    mode                    http
+    mode                    tcp
     log                     global
     option                  httplog
     option                  dontlognull
@@ -69,19 +69,24 @@ defaults
 # main frontend which proxys to the backends
 #---------------------------------------------------------------------
 frontend main
-    bind    *:6443
+    bind    *:{{ control_plane_endpoint_port }}
     bind    *:80
 
-    stats uri /proxystats
-    default_backend kubeservers
+    default_backend kubemasterservers
 
-backend kubeservers
-   balance roundrobin
-   server easy-kube-master0  192.168.0.213:6443 check
-   server easy-kube-master1  192.168.0.214:6443 check
-   server easy-kube-master2  192.168.0.215:6443 check
+backend kubemasterservers
+    balance roundrobin
+{% for host in groups['kubernetes_master'] %}
+    server {{ hostvars[host].inventory_hostname }} {{ hostvars[host].ansible_eth1.ipv4.address }}:{{ control_plane_endpoint_port }} check 
+{% endfor %}
     
     #redirect scheme https code 301 if !{ ssl_fc }
 
     # HSTS (63072000 seconds)
-    #http-response set-header Strict-Transport-Security max-age=63072000
+    http-response set-header Strict-Transport-Security max-age=63072000
+
+listen stats
+    bind    *:9999
+    mode    http
+    stats   enable
+    stats   uri /

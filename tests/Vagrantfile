@@ -11,8 +11,8 @@ Vagrant.configure("2") do |config|
   config.ssh.username = 'vagrant'
 
   # Create arrays of master and node machine names
-  master_machines = (0...KUBE_MASTER_COUNT).to_a.map{|x| "easy-kube-master#{x}"}
-  node_machines = (0...KUBE_NODE_COUNT).to_a.map{|x| "easy-kube-node#{x}"}
+  master_machines = (0...KUBE_MASTER_COUNT).to_a.map{|x| "easy-kube-master-#{x}"}
+  node_machines = (0...KUBE_NODE_COUNT).to_a.map{|x| "easy-kube-node-#{x}"}
   # create array for haproxy if multi-master mode enabled
   haproxy_machines = ["easy-kube-haproxy-0"]
 
@@ -61,7 +61,7 @@ Vagrant.configure("2") do |config|
           ansible.playbook = "../create-cluster-playbook.yml"
           if KUBE_MULTI_MASTER
             ansible.extra_vars = {
-              multi_master: true
+              control_plane_multi_master: true
             }
           end
 

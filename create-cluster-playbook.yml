@@ -1,13 +1,16 @@
 ---
-- name: Provision base
+- name: base
   hosts: all
-
   roles:
   - role: base
 
-- name: Setup a Kubernetes cluster
-  hosts: kubernetes_servers
+- name: haproxy
+  hosts: kubernetes_haproxy
+  roles:
+  - role: haproxy
 
+- name:  kubernetes
+  hosts: kubernetes_servers
   roles:
   - role: podman
 
