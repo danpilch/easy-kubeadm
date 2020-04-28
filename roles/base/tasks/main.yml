@@ -1,18 +1,28 @@
 ---
+- name: speed up dnf
+  lineinfile: 
+    path: "/etc/dnf/dnf.conf"
+    state: present
+    line: "{{ item }}"
+  with_items:
+  - "max_parallel_downloads=10"
+
 - name: upgrade all packages
-  yum:
+  dnf:
     name: '*'
     state: latest
 
 - name: Install epel
-  yum:
+  dnf:
     name: epel-release
     state: latest
 
 - name: Install extras
-  yum:
+  dnf:
     name: 
       - "@Development Tools"
+      - iproute-tc
+      - bind-utils
       - tmux
       - vim
       - htop

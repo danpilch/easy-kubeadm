@@ -1,0 +1,34 @@
+---
+- name: Install selinux manage python library
+  yum:
+    name: python3-libsemanage
+    state: installed
+  tags: haproxy
+
+- name: Allow haproxy selinux capabilities
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
+  tags: haproxy
+
+- name: Install haproxy
+  yum:
+    name: haproxy
+    state: latest
+  tags: haproxy
+
+- name: Generate haproxy.cfg
+  template: 
+    src: "haproxy.cfg.j2"
+    dest: "/etc/haproxy/haproxy.cfg"
+    owner: root
+    group: root
+  tags: haproxy
+
+- name: Restart haproxy and enable
+  service:
+    name: haproxy
+    state: restarted
+    enabled: true
+  tags: haproxy

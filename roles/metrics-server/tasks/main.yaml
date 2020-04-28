@@ -1,5 +1,5 @@
 ---
 
 - include: metrics.yaml
-  when: install_metrics_server and inventory_hostname in groups['kubernetes_master']
+  when: install_metrics_server and inventory_hostname in groups['kubernetes_master'][0]
   tags: install_metrics_server
