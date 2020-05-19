@@ -1,0 +1,61 @@
+    - name: Install yum utils
+      yum:
+        name: yum-utils
+        state: latest
+
+    - name: Install device-mapper-persistent-data
+      yum:
+        name: device-mapper-persistent-data
+        state: latest
+
+    - name: Install lvm2
+      yum:
+        name: lvm2
+        state: latest
+
+    - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+      become: yes
+
+
+    - name: Install containerd.io
+      shell: yum install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
+      become: yes
+
+    - name: Install Docker-ce
+      yum:
+        name: docker-ce
+      become: yes
+
+    - name: mkdir for docker
+      file:
+        path: /etc/docker
+        state: directory
+
+    - name: mkdir for systemd docker
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+
+     # Defining cgroup-driver
+    - name: Define sysconfig kubelet
+      template:
+        src: "daemon.json.j2"
+        dest: "/etc/docker/daemon.json"
+        owner: root
+        group: root
+      tags: define_sysconfig_kubelet
+
+    - name: reload systemd daemon
+      systemd:
+        daemon_reload: true
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      become: yes
+

@@ -38,10 +38,41 @@
   when: inventory_hostname in groups['kubernetes_master'][0]
   tags: get_k8s_version
 
+- name: mkdir for cni
+  file:
+    path: /etc/kubernetes/cni
+    state: directory
+  when: inventory_hostname in groups['kubernetes_master']
+
+- name: Copy kube-flannel.yaml to kubernetes folder
+  copy: 
+    src: kube-flannel.yaml 
+    dest: /etc/kubernetes/cni/kube-flannel.yaml
+    mode: 0644
+  when: inventory_hostname in groups['kubernetes_master']
+
 - name: Install overlay network
-  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f 'https://cloud.weave.works/k8s/net?k8s-version={{ hostvars[groups['kubernetes_master'][0]].k8s_version.stdout }}'"
+  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/cni/kube-flannel.yaml"
   when: inventory_hostname in groups['kubernetes_master'][0]
-  tags: install_weave_overlay_network
+  tags: install_flannel_overlay_network
+
+- name: mkdir for ingress
+  file:
+    path: /etc/kubernetes/ingress
+    state: directory
+  when: inventory_hostname in groups['kubernetes_master']
+
+- name: Copy nginx-ingress.yaml to kubernetes folder
+  copy:
+    src: nginx-ingress.yaml
+    dest: /etc/kubernetes/ingress/nginx-ingress.yaml
+    mode: 0644
+  when: inventory_hostname in groups['kubernetes_master']
+
+- name: Install nginx-ingress network
+  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/ingress/nginx-ingress.yaml"
+  when: inventory_hostname in groups['kubernetes_master'][0]
+  tags: install_ingress_overlay_network
 
 - name: Start secondary master nodes
   shell: "{{ hostvars[groups['kubernetes_master'][0]].kubeadm_join_control_plane_command.stdout_lines[-1] }}"
@@ -53,8 +84,6 @@
     path: "/home/vagrant/.kube/"
     state: directory 
     mode: 0755
-    owner: vagrant
-    group: vagrant
   when: inventory_hostname in groups['kubernetes_master']
   tags: copy_kubeconfig
 
@@ -63,9 +92,7 @@
     src: "/etc/kubernetes/admin.conf"
     dest: "/home/vagrant/.kube/config"
     remote_src: true
-    owner: vagrant
-    group: vagrant
-  when: inventory_hostname in groups['kubernetes_master'][0]
+  when: inventory_hostname in groups['kubernetes_master']
   tags: copy_kubeconfig
 
 - name: Add kubectl autocompletion to bashrc for vagrant user

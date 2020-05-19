@@ -1,7 +1,0 @@
-[devel_kubic_libcontainers_stable]
-name=Stable Releases of Upstream github.com/containers packages (CentOS_8)
-type=rpm-md
-baseurl=http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/
-gpgcheck=1
-gpgkey=http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_8/repodata/repomd.xml.key
-enabled=1
