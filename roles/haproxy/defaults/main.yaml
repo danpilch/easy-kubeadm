@@ -1,3 +1,0 @@
----
-control_plane_endpoint_port: 6443
-control_plane_endpoint_port_ha: 8080

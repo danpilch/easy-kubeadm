@@ -1,0 +1,38 @@
+vrrp_script check_haproxy {
+  script "pgrep haproxy"
+  interval 2
+}
+
+vrrp_instance VI_{{ groups.kubernetes_master.index(inventory_hostname) }} {
+  # Instance with the highest priority will become MASTER,
+  # so the entry here doesn't matter a whole lot.
+  state BACKUP
+  interface {{ keepalived.interface }}
+  virtual_router_id {{ keepalived.vrid | default('51') }}
+  priority {{ 100 - 10 * groups.kubernetes_master.index(inventory_hostname) }}
+  advert_int {{ keepalived.adv_interval }}
+
+  authentication {
+    auth_type {{ keepalived.authtype | default('PASS') }}
+    auth_pass {{ keepalived.password | default('k8s@123') }}
+  }
+
+  unicast_src_ip {{ hostvars[inventory_hostname]['ansible_' + keepalived.interface].ipv4.address }}
+
+  unicast_peer {
+{% for host in groups['kubernetes_master'] %}
+{% if host != inventory_hostname %}
+    {{ hostvars[host]['ansible_' + keepalived.interface].ipv4.address }}
+{% endif %}
+{% if not loop.last -%}{%- endif -%}
+{% endfor %}
+  }
+
+  virtual_ipaddress {
+    {{ keepalived.shared_ip }} dev {{ keepalived.interface }} label {{ keepalived.interface }}:vip
+  }
+
+  track_script {
+    check_haproxy
+  }
+}

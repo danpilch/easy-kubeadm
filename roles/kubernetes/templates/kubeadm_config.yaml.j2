@@ -8,6 +8,8 @@ kind: ClusterConfiguration
 {% if control_plane_multi_master|bool %} 
 controlPlaneEndpoint: "{{ control_plane_endpoint_address }}:{{ control_plane_endpoint_port_ha }}"
 {% endif %}
+networking:
+  podSubnet: "{{ flannel_network }}"
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: JoinConfiguration

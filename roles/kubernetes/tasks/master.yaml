@@ -14,10 +14,16 @@
     dest: "/tmp/kubeadm_config.yaml"
   tags: generate_kubeadm_config
 
+- name: Check if admin.conf exists
+  stat:
+    path: /etc/kubernetes/admin.conf
+  when: inventory_hostname in groups['kubernetes_master']
+  register: stat_k8s_result
+
 - name: Start master node
   shell: "kubeadm init --config /tmp/kubeadm_config.yaml {% if control_plane_multi_master|bool %}--upload-certs{% endif %}"
   register: kubeadm_init
-  when: inventory_hostname in groups['kubernetes_master'][0]
+  when: inventory_hostname in groups['kubernetes_master'][0] and stat_k8s_result.stat.exists == False
   tags: init_kubernetes_master
 
 - name: Generate master join command from master
@@ -46,12 +52,15 @@
 
 - name: Start secondary master nodes
   shell: "{{ hostvars[groups['kubernetes_master'][0]].kubeadm_join_control_plane_command.stdout_lines[-1] }}"
-  when: inventory_hostname in groups['kubernetes_master'][1:] and control_plane_multi_master|bool
+  when: 
+    - inventory_hostname in groups['kubernetes_master'][1:] 
+    - control_plane_multi_master|bool 
+    - stat_k8s_result.stat.exists == False
   tags: init_secondary_kubernetes_masters
 
 - name: Create kubeconfig directory in root user directory
   file:
-    path: "/home/root/.kube/"
+    path: "/root/.kube/"
     state: directory 
     mode: 0755
   when: inventory_hostname in groups['kubernetes_master']
@@ -60,14 +69,14 @@
 - name: Copy kubectl admin config file to root user directory
   copy:
     src: "/etc/kubernetes/admin.conf"
-    dest: "/home/root/.kube/config"
+    dest: "/root/.kube/config"
     remote_src: true
   when: inventory_hostname in groups['kubernetes_master']
   tags: copy_kubeconfig
 
 - name: Add kubectl autocompletion to bashrc for root user
   lineinfile:
-    dest: "/home/root/.bashrc"
+    dest: "/root/.bashrc"
     line: "source <(kubectl completion bash)"
     state: present
   when: inventory_hostname in groups['kubernetes_master']

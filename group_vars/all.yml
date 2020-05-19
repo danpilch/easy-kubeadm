@@ -1,0 +1,46 @@
+---
+# Kubernetes Vars
+
+kubernetes_version: "v1.18.1"
+kubernetes_service_subnet: "10.96.0.0/12"
+
+kubernetes_ipvs_enabled: true
+# Strict ARP required for Metal LB: https://metallb.universe.tf/installation/
+kubernetes_ipvs_strict_arp: true
+# More about schedulers can be found: https://docs.huihoo.com/hpc-cluster/linux-virtual-server/HOWTO/LVS-HOWTO.ipvsadm.html
+kubernetes_ipvs_scheduler: "rr"
+
+# Multi master control plane configuration
+# control_plane_endpoint_address can be either dns or ip
+control_plane_endpoint_address: "{{ keepalived.shared_ip }}"
+# disabled by default. this is anabled in vagrantfile extra_args
+control_plane_multi_master: true
+
+#flannel network # only one network plugin should be enable either weave or flannel
+flannel: true
+flannel_network: "10.244.0.0/16"
+
+# HAProxy
+haproxy:
+  enabled: true
+  monitor_port: 9090
+  admin_user: admin
+  admin_password: admin123
+
+# Keepalive
+
+keepalived:
+  enabled: true
+  interface: eth1
+  shared_ip: 10.0.0.200      # Virtual IP
+  vrid: 110                     # Virtual Router ID
+  adv_interval: 1               # VRRP advert interval
+  authtype: PASS                # 'PASS' (simple password) or 'AH' (IPSEC)
+  password: k8s@123             # password for accessing VRRP
+
+#Haproxy 
+control_plane_endpoint_port: 6443
+control_plane_endpoint_port_ha: 8080
+
+#Metrics Server
+install_metrics_server: true

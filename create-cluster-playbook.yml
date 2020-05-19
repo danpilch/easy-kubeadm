@@ -5,13 +5,21 @@
   - role: base
 
 - name: haproxy
-  hosts: kubernetes_haproxy
+  hosts: kubernetes_master 
   roles:
   - role: haproxy
 
+- name: keepalived
+  hosts: kubernetes_master 
+  roles:
+    - { role: keepalived, when: keepalived.enabled }
+  tags:
+    - keepalived
+ 
 - name:  kubernetes
   hosts: kubernetes_servers
   roles:
+
   - role: docker
 
   - role: kubernetes

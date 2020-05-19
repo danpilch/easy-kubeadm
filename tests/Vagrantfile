@@ -14,13 +14,14 @@ Vagrant.configure("2") do |config|
   master_machines = (0...KUBE_MASTER_COUNT).to_a.map{|x| "easy-kube-master-#{x}"}
   node_machines = (0...KUBE_NODE_COUNT).to_a.map{|x| "easy-kube-node-#{x}"}
   # create array for haproxy if multi-master mode enabled
-  haproxy_machines = ["easy-kube-haproxy-0"]
+  #haproxy_machines = ["easy-kube-haproxy-0"]
 
   # Concat arrays for iteration
   if KUBE_MULTI_MASTER
-    machines = master_machines + node_machines + haproxy_machines
+    #machines = master_machines + node_machines + haproxy_machines
+    machines = master_machines + node_machines
     ansible_groups = {
-      "kubernetes_haproxy" => haproxy_machines,
+      #"kubernetes_haproxy" => haproxy_machines,
       "kubernetes_master" => master_machines,
       "kubernetes_nodes" => node_machines,
       "kubernetes_servers:children" => ["kubernetes_master", "kubernetes_nodes"]
@@ -41,7 +42,7 @@ Vagrant.configure("2") do |config|
     # We want to get rid of the first default route so that ansible
     # Recognizes the second eth1 interface as ansible_default_ipv4
     # Which in this case it attached to our actual LAN network
-    override.vm.network "public_network", bridge: "en0",
+    override.vm.network "public_network", bridge: "en0: Wi-Fi (Wireless)",
       use_dhcp_assigned_default_route: true
     override.vm.provision "shell",
       run: "always",
