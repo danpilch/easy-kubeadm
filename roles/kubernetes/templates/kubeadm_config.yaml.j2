@@ -6,7 +6,7 @@ certificateKey: "{{ kubeadm_certificate_key }}"
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 {% if control_plane_multi_master|bool %} 
-controlPlaneEndpoint: "{{ control_plane_endpoint_address }}:{{ control_plane_endpoint_port }}"
+controlPlaneEndpoint: "{{ control_plane_endpoint_address }}:{{ control_plane_endpoint_port_ha }}"
 {% endif %}
 ---
 apiVersion: kubeadm.k8s.io/v1beta2

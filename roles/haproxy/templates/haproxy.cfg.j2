@@ -69,7 +69,7 @@ defaults
 # main frontend which proxys to the backends
 #---------------------------------------------------------------------
 frontend main
-    bind    *:{{ control_plane_endpoint_port }}
+    bind    *:{{ control_plane_endpoint_port_ha }}
 
     default_backend kubemasterservers
 
