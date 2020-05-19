@@ -42,7 +42,7 @@ frontend main
 backend kubemasterservers
     balance roundrobin
 {% for host in groups['kubernetes_master'] %}
-    server {{ hostvars[host].inventory_hostname }} {{ hostvars[host].ansible_eth1.ipv4.address }}:{{ control_plane_endpoint_port }} check 
+    server {{ hostvars[host].inventory_hostname }} {{ hostvars[host]['ansible_' + keepalived.interface].ipv4.address }}:{{ control_plane_endpoint_port }} check 
 {% endfor %}
     
     #redirect scheme https code 301 if !{ ssl_fc }
