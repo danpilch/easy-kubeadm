@@ -38,23 +38,40 @@
   when: inventory_hostname in groups['kubernetes_master'][0]
   tags: get_k8s_version
 
-- name: mkdir for cni
-  file:
-    path: /etc/kubernetes/cni
-    state: directory
-  when: inventory_hostname in groups['kubernetes_master']
-
-- name: Copy kube-flannel.yaml to kubernetes folder
-  copy: 
-    src: kube-flannel.yaml 
-    dest: /etc/kubernetes/cni/kube-flannel.yaml
-    mode: 0644
-  when: inventory_hostname in groups['kubernetes_master']
-
+#https://raw.githubusercontent.com/jaganthoutam/easy-kubeadm/master/roles/kubernetes/files/kube-flannel.yml
 - name: Install overlay network
-  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/cni/kube-flannel.yaml"
+  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/jaganthoutam/easy-kubeadm/master/roles/kubernetes/files/kube-flannel.yml"
   when: inventory_hostname in groups['kubernetes_master'][0]
   tags: install_flannel_overlay_network
+
+- name: Start secondary master nodes
+  shell: "{{ hostvars[groups['kubernetes_master'][0]].kubeadm_join_control_plane_command.stdout_lines[-1] }}"
+  when: inventory_hostname in groups['kubernetes_master'][1:] and control_plane_multi_master|bool
+  tags: init_secondary_kubernetes_masters
+
+- name: Create kubeconfig directory in root user directory
+  file:
+    path: "/home/root/.kube/"
+    state: directory 
+    mode: 0755
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: copy_kubeconfig
+
+- name: Copy kubectl admin config file to root user directory
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "/home/root/.kube/config"
+    remote_src: true
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: copy_kubeconfig
+
+- name: Add kubectl autocompletion to bashrc for root user
+  lineinfile:
+    dest: "/home/root/.bashrc"
+    line: "source <(kubectl completion bash)"
+    state: present
+  when: inventory_hostname in groups['kubernetes_master']
+  tags: add_kubectl_completion
 
 - name: mkdir for ingress
   file:
@@ -70,35 +87,36 @@
   when: inventory_hostname in groups['kubernetes_master']
 
 - name: Install nginx-ingress network
-  shell: "kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /etc/kubernetes/ingress/nginx-ingress.yaml"
+  shell: "kubectl apply -f /etc/kubernetes/ingress/nginx-ingress.yaml"
   when: inventory_hostname in groups['kubernetes_master'][0]
   tags: install_ingress_overlay_network
 
-- name: Start secondary master nodes
-  shell: "{{ hostvars[groups['kubernetes_master'][0]].kubeadm_join_control_plane_command.stdout_lines[-1] }}"
-  when: inventory_hostname in groups['kubernetes_master'][1:] and control_plane_multi_master|bool
-  tags: init_secondary_kubernetes_masters
 
-- name: Create kubeconfig directory in vagrant user directory
+- name: mkdir for default apps
   file:
-    path: "/home/vagrant/.kube/"
-    state: directory 
-    mode: 0755
+    path: /etc/kubernetes/default
+    state: directory
   when: inventory_hostname in groups['kubernetes_master']
-  tags: copy_kubeconfig
 
-- name: Copy kubectl admin config file to vagrant user directory
+
+- name: Copy hello-world.yaml to kubernetes folder
   copy:
-    src: "/etc/kubernetes/admin.conf"
-    dest: "/home/vagrant/.kube/config"
-    remote_src: true
+    src: hello-world.yaml
+    dest: /etc/kubernetes/default/hello-world.yaml
+    mode: 0644
   when: inventory_hostname in groups['kubernetes_master']
-  tags: copy_kubeconfig
 
-- name: Add kubectl autocompletion to bashrc for vagrant user
-  lineinfile:
-    dest: "/home/vagrant/.bashrc"
-    line: "source <(kubectl completion bash)"
-    state: present
+
+- name: Copy ingress-usage.yaml to kubernetes folder
+  copy:
+    src: nginx-ingress.yaml
+    dest: /etc/kubernetes/default/ingress-usage.yaml
+    mode: 0644
   when: inventory_hostname in groups['kubernetes_master']
-  tags: add_kubectl_completion
+
+- name: Install nginx-ingress network
+  shell: "kubectl apply -f /etc/kubernetes/default/"
+  when: inventory_hostname in groups['kubernetes_master'][0]
+  tags: install_demo_app_with_ingess
+
+
